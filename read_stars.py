@@ -37,7 +37,7 @@ class Star:
         mins = float(string[2:4])
         secs = float(string[4:])
 
-        return degs + mins/60 + secs/3600
+        return sign*(degs + mins/60 + secs/3600)
 
 
 stars = []
