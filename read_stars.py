@@ -13,7 +13,7 @@ class Star:
         self.mag = new_mag
 
     @staticmethod
-    def str_to_ra(string):
+    def to_ra(string):
         string = string.strip()
         if len(string) == 0:
             return 0
@@ -25,7 +25,7 @@ class Star:
         return hrs + mins/60 + secs/3600
 
     @staticmethod
-    def str_to_dec(string):
+    def to_dec(string):
         string = string.strip()
         if len(string) == 0:
             return 0
@@ -45,8 +45,8 @@ stars = []
 f = open('bsc5.dat', 'r')
 for line in f:
     name = line[25:31].strip()  # Henry Draper number of the star
-    ra = Star.str_to_ra(line[75:83])  # J2000 right ascension
-    dec = Star.str_to_dec(line[83:90])  # J2000 declination
+    ra = Star.to_ra(line[75:83])  # J2000 right ascension
+    dec = Star.to_dec(line[83:90])  # J2000 declination
 
     mag = line[102:107].strip()
     mag = 999 if len(mag) == 0 else float(mag)
