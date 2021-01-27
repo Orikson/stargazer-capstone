@@ -1,10 +1,12 @@
 
+import math
+from math import pi
+
 import cv2
 import matplotlib.image as mpimg
 import numpy as np
-import math
-from math import pi
 import pandas
+
 
 class star:
     name = ''
@@ -44,21 +46,9 @@ class star:
         return sign*(degs + mins/60 + secs/3600)
 
 
-def hav(x):
-    return (1 - math.cos(x))/2
-
-
-def haversine_distance(x, y):
-    h = hav(y[0] - x[0]) + math.cos(x[0])*math.cos(y[0])*hav(y[1] - x[1])
-    return 2*math.asin(math.sqrt(h)) #assume unit sphere
-
-
-def similarity(x, y):
-    # return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
-    return math.dist(x, y)
-
+# read all of the star info from the bsc5.dat file
+# and write it to the stars array
 stars = []
-
 f = open('bsc5.dat', 'r')
 for line in f:
     name = line[25:31].strip()  # Henry Draper number of the star
@@ -71,14 +61,13 @@ for line in f:
     stars.append(star(name, ra, dec, mag))
 
 stars.sort(key=lambda x: x.mag)
-stars = stars[:200]
 
-
+# read an image and find the locations of the stars
 filename = input('Enter an image filename here: ')
 img = cv2.imread(filename)
 
 # convert the image to grayscale
-gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
 
 # convert the grayscale image to binary image
 thresh = cv2.threshold(
@@ -109,30 +98,45 @@ for c in contours:
 cv2.imshow("Image", img)
 cv2.waitKey(0)
 
+# find the centermost star
 x_avg = sum(np.array(star_centers)[:, 0]/len(star_centers))
 y_avg = sum(np.array(star_centers)[:, 1]/len(star_centers))
 
 print(x_avg, y_avg)
-print(min(star_centers, key=lambda a: math.dist(a, [x_avg, y_avg])))
+center_star = min(star_centers, key=lambda a: math.dist(a, [x_avg, y_avg]))
+print(center_star)
 
-distances = sorted([math.dist(i, [x_avg, y_avg]) for i in star_centers])
+distances = sorted([math.dist(i, center_star) for i in star_centers])
 # print(distances)
 
-# algorithm
-# find the centermost star:
-# check each star in the database to see how well it works as the center star
+# check each star in the database to see how well it works as the centermost star
+# by computing the array of distances from the selected star to each other star
+# and compare the array to the given image
+def hav(x):
+    return (1 - math.cos(x))/2
 
-best_similarity = -1
+def haversine_distance(x, y):
+    x[0] = math.radians(x[0])
+    x[1] = math.radians(x[1])
+    y[0] = math.radians(y[0])
+    y[1] = math.radians(y[1])
+
+    h = hav(y[0] - x[0]) + math.cos(x[0])*math.cos(y[0])*hav(y[1] - x[1])
+    return 2*math.asin(math.sqrt(h)) #assume unit sphere
+
+
+def similarity(x, y):
+    # return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
+    return math.dist(x, y)
+
+best_similarity = 200
 best_star = -1
 for s in stars:
-    ref_distances = [haversine_distance([pi/180*i.dec, pi/180*i.ra], [pi/180*s.dec, pi/180*s.ra]) for i in stars]
-    ref_distances = sorted(ref_distances)[:len(distances)]
+    ref_distances = [haversine_distance([i.dec, i.ra], [s.dec, s.ra]) for i in stars]
+    ref_distances = sorted(ref_distances)
 
-    # todo: implement algorithm that finds stars that best fit the model
-
-    print(similarity(distances, ref_distances))
-    print(s.name, ref_distances)
-    if similarity(distances, ref_distances) > best_similarity:
+    # find the star that works best as the center star by comparing the set of distances
+    if similarity(distances, ref_distances) < best_similarity:
         best_similarity = similarity(distances, ref_distances)
         best_star = s
 
