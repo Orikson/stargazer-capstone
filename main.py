@@ -61,6 +61,7 @@ for line in f:
     stars.append(star(name, ra, dec, mag))
 
 stars.sort(key=lambda x: x.mag)
+stars = stars[:200] # 200 brightest stars
 
 # read an image and find the locations of the stars
 filename = input('Enter an image filename here: ')
@@ -95,8 +96,8 @@ for c in contours:
         if cX < x_length and cY < y_length:
             star_centers.append([cX/x_length, cY/y_length])
 
-cv2.imshow("Image", img)
-cv2.waitKey(0)
+# cv2.imshow("Image", img)
+# cv2.waitKey(0)
 
 # find the centermost star
 x_avg = sum(np.array(star_centers)[:, 0]/len(star_centers))
@@ -107,7 +108,8 @@ center_star = min(star_centers, key=lambda a: math.dist(a, [x_avg, y_avg]))
 print(center_star)
 
 distances = sorted([math.dist(i, center_star) for i in star_centers])
-# print(distances)
+# distances = [[i[0] - center_star[0], i[1] - center_star[1]] for i in star_centers]
+print(distances)
 
 # check each star in the database to see how well it works as the centermost star
 # by computing the array of distances from the selected star to each other star
@@ -133,7 +135,7 @@ best_similarity = 200
 best_star = -1
 for s in stars:
     ref_distances = [haversine_distance([i.dec, i.ra], [s.dec, s.ra]) for i in stars]
-    ref_distances = sorted(ref_distances)
+    ref_distances = sorted(ref_distances)[:len(distances)]
 
     # find the star that works best as the center star by comparing the set of distances
     if similarity(distances, ref_distances) < best_similarity:
