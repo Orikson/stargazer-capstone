@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+</head>
+
+<body>
+
+    <input type="file" id="myFile" accept=".jpg, .jpeg, .png">
+    <script>
+        const fileSelector = document.getElementById("myFile");
+        fileSelector.addEventListener("change", (event) => {
+            const fileList = event.target.files;
+            console.log(fileList);
+            document.getElementById("fileDescriptor").innerHTML = 'The file you uploaded is: ' + fileList[0]['name'];
+
+            var file = fileList[0];
+            if (file.type && file.type.indexOf('image') === -1) {
+                console.log('Wrong file type');
+            }
+
+            const reader = new FileReader();
+            reader.addEventListener('load', (event) => {
+                document.getElementById('output').src = event.target.result;
+            });
+            reader.readAsDataURL(file);
+        });
+    </script>
+    
+    <p id="fileDescriptor">The file you uploaded is: </p>
+    <img id="output">
+</body>
+
+</html>
