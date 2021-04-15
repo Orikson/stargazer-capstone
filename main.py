@@ -49,7 +49,7 @@ class star:
 # read all of the star info from the bsc5.dat file
 # and write it to the stars array
 stars = []
-f = open('bsc5.dat', 'r')
+f = open('bsc5.txt', 'r')
 for line in f:
     name = line[25:31].strip()  # Henry Draper number of the star
     ra = star.to_ra(line[75:83])  # J2000 right ascension
@@ -110,6 +110,7 @@ print(center_star)
 distances = sorted([math.dist(i, center_star) for i in star_centers])
 # distances = [[i[0] - center_star[0], i[1] - center_star[1]] for i in star_centers]
 print(distances)
+print(star_centers)
 
 # check each star in the database to see how well it works as the centermost star
 # by computing the array of distances from the selected star to each other star
