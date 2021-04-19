@@ -80,10 +80,14 @@ fs.readFile('bsc5.txt', 'utf-8', (err, data) => {
     stars = stars.slice(0, 50);
 });
 
+let star_centers = [];
+app.get("/centers", (req, res) => {
+    star_centers = req.query.arr;
 
+    console.log(star_centers);
+});
 
 // array to store the coordinates of the star centers
-let star_centers = []
 
 // find the centermost star
 // x_avg = sum(np.array(star_centers)[:, 0]/len(star_centers))
