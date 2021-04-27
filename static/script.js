@@ -44,7 +44,9 @@ fileSelector.addEventListener("change", (event) => {
                 let cnt = cv.moments(contours.get(i), false);
                 let cx = Math.floor(cnt.m10 / cnt.m00);
                 let cy = Math.floor(cnt.m01 / cnt.m00);
-                star_centers.push([cx, cy]);
+                if (String(cx) != 'NaN' && String(cy) != 'NaN') {
+                    star_centers.push([cx / img.height, cy / img.width]);
+                }
 
                 for (let j = -1; j <= 1; j++) {
                     for (let k = -1; k <= 1; k++) {
