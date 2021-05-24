@@ -2,7 +2,7 @@
 const fileSelector = document.getElementById("myFile");
 fileSelector.addEventListener("change", (event) => {
     const fileList = event.target.files;
-    document.getElementById("fileDescriptor").innerHTML = 'The file you uploaded is: ' + fileList[0]['name'];
+    document.getElementById("fileDescriptor").innerHTML = `The file you uploaded is: ${fileList[0]['name']}`;
     var file = fileList[0];
 
     // Check to see if the file uploaded is an image
@@ -61,10 +61,18 @@ fileSelector.addEventListener("change", (event) => {
 
             console.log(star_centers);
 
-            fetch(`/centers?arr=${encodeURI(star_centers)}`);
-
             ctxEdited.putImageData(imageData, 0, 0);
             src.delete(); dst.delete(); contours.delete(); hierarchy.delete();
+
+            fetch(`/centers?arr=${encodeURI(star_centers)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('location').innerHTML
+                    = `You are looking at a right ascension of ${data.star.ra} and a declination of ${data.star.dec}.`;
+                    
+                    document.getElementById('constellation').innerHTML 
+                        = `I think your constellation is ${data.constellation}.`;
+                })
         }
     });
     reader.readAsDataURL(file);

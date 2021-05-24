@@ -34,9 +34,9 @@ class Star {
 
         let sign = (string[0] === '-') ? -1 : 1
 
-        let degs = parseFloat(string.substring(0, 2));
-        let mins = parseFloat(string.substring(2, 4));
-        let secs = parseFloat(string.substring(4));
+        let degs = parseFloat(string.substring(1, 3));
+        let mins = parseFloat(string.substring(3, 5));
+        let secs = parseFloat(string.substring(5));
 
         return sign * (degs + mins / 60 + secs / 3600)
     }
@@ -67,6 +67,7 @@ fs.readFile('bsc5.txt', 'utf-8', (err, data) => {
 
     stars.sort((a, b) => a.mag - b.mag);
     stars = stars.slice(0, 200);
+    console.log(stars.splice(0, 10));
 });
 
 app.get("/centers", (req, res) => {
@@ -129,17 +130,56 @@ app.get("/centers", (req, res) => {
         ref_distances.sort((a, b) => a - b);
         ref_distances = ref_distances.splice(0, distances.length);
 
+        // console.log(ref_distances);
+
         // find the star that works best as the center star by comparing the set of distances
-        if (similarity(distances, ref_distances) < best_similarity) {
+        if (similarity(distances, ref_distances) < best_similarity && best_similarity > 3.5) {
             best_similarity = similarity(distances, ref_distances);
             best_star = s;
+
+            console.log(s);
+            console.log(best_similarity);
         }
     }
 
     console.log(best_star);
     console.log(best_similarity);
+
+    console.log(best_constellation(best_star.ra, best_star.dec));
+
+    res.send(JSON.stringify({
+        constellation: best_constellation(best_star.ra, best_star.dec),
+        star: best_star
+    }));
 });
 
+
+/**
+ * Constellation location is based on the location of the alpha star
+ */
+var constellations;
+fs.readFile('constellations.json', (err, data) => {
+    if (err) throw err;
+    constellations = JSON.parse(data);
+    console.log(constellations);
+})
+
+function best_constellation(ra, dec) {
+    let best_constellation = -1;
+    let best_similarity = 100000;
+    for (let c of Object.keys(constellations)) {
+        let constellation_ra = constellations[c].alpha.ra;
+        let constellation_dec = constellations[c].alpha.dec;
+
+        let distance = haversine_distance([constellation_ra, constellation_dec], [ra, dec]);
+        if (distance < best_similarity) {
+            best_similarity = distance;
+            best_constellation = c;
+        }
+    }
+
+    return best_constellation;
+}
 
 function dist(x, y) {
     let d = 0;
